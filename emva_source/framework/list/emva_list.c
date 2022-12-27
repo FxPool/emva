@@ -1,0 +1,279 @@
+// Copyright (c) 2021-2022 The Emva Core developers
+// Distributed under the xxx_xx_xxx software license, see the accompanying
+// file COPYING or http://www.evirtualarch.org
+
+#include "emva_framework.h"
+#include "emva_list.h"
+#include "emva_malloc.h"
+#include <stdlib.h>
+#include "stdio.h"
+#include "string.h"
+#if EMVA_FM_LIST_ENABLED == 1
+Link_List *Link_List_Init(void)
+{
+    Link_List *pList = NULL;
+    pList = (Link_List *)emva_malloc(sizeof(Link_List));
+    if (pList == NULL)
+    {
+        return NULL;
+    }
+    pList->length = 0;
+    pList->head = NULL;
+    pList->trail = NULL;
+    return pList;
+}
+
+int Link_List_Insert(Link_List *pList, void *pData, long index)
+{
+    long i = 0;
+    if (pList == NULL)
+        return -1;
+    if (index < -1 || (index > pList->length && index != -1))
+    {
+        return -1;
+    }
+    if (pList->length == 0)
+    {
+        Link_Node *pNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+        if (pNode == NULL)
+            return -1;
+        pNode->data = pData;
+        pNode->priorNode = NULL;
+        pNode->nextNode = NULL;
+        pList->head = pNode;
+        pList->trail = pNode;
+        pList->length++;
+        return 0;
+    }
+    else
+    {
+        if (-1 == index)
+        {
+            Link_Node *pNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+            if (pNode == NULL)
+                return -1;
+            pNode->data = pData;
+            pNode->nextNode = NULL;
+            pNode->priorNode = pList->trail;
+
+            pList->trail->nextNode = pNode;
+            pList->trail = pNode;
+            pList->length++;
+        }
+        else if (0 == index)
+        {
+            Link_Node *pNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+            if (pNode == NULL)
+                return -1;
+            pNode->data = pData;
+            pNode->nextNode = pList->head;
+            pNode->priorNode = NULL;
+
+            pList->head->priorNode = pNode;
+            pList->head = pNode;
+            pList->length++;
+            return 0;
+        }
+        else
+        {
+
+            Link_Node *pNode = pList->head;
+            i = 0;
+            while (pNode != NULL)
+            {
+                if (index == i)
+                {
+
+                    Link_Node *pCurrentNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+                    if (pCurrentNode == NULL)
+                        return -1;
+                    pCurrentNode->nextNode = pNode;
+                    pCurrentNode->priorNode = pNode->priorNode;
+
+                    pNode->priorNode->nextNode = pCurrentNode;
+                    pNode->priorNode = pCurrentNode;
+                    pList->length++;
+                    return 0;
+                }
+                pNode = pNode->nextNode;
+                i++;
+            }
+        }
+    }
+    return 0;
+}
+
+void *Link_List_GetAt(Link_List *pList, unsigned long index)
+{
+    int i = 0;
+    Link_Node *pNode = NULL;
+    if (pList == NULL)
+    {
+        return NULL;
+    }
+    i = 0;
+    pNode = pList->head;
+    while (pNode != NULL)
+    {
+        if (i == index)
+        {
+            return pNode->data;
+        }
+        pNode = pNode->nextNode;
+        i++;
+    }
+    return NULL;
+}
+
+int Link_List_object_SearchAt(Link_List *pList, object_t *object)
+{
+    Link_Node *pNode = NULL;
+    if (pList == NULL)
+    {
+        return -1;
+    }
+    int i = 0;
+    pNode = pList->head;
+    while (pNode != NULL)
+    {
+        if (isEqual((unsigned char *)pNode->data, (unsigned char *)object->data, object->length))
+        {
+            return i;
+        }
+        pNode = pNode->nextNode;
+        i++;
+    }
+    return -1;
+}
+
+void Link_List_object_RemoveAt(Link_List *pList, object_t *object)
+{
+    Link_Node *pNode = NULL;
+    if (pList == NULL)
+    {
+        return;
+    }
+    pNode = pList->head;
+    while (pNode != NULL)
+    {
+        if (isEqual((unsigned char *)pNode->data, (unsigned char *)object->data, object->length))
+        {
+            if (pNode->priorNode == NULL)
+            {
+                Link_Node *head = pList->head;
+                pList->head = head->nextNode;
+                pList->head->priorNode = NULL;
+                emva_free(head);
+                pList->length--;
+            }
+            else if (pNode->nextNode == NULL)
+            {
+                Link_Node *trial = pList->trail;
+                pList->trail = trial->priorNode;
+                pList->trail->nextNode = NULL;
+                emva_free(trial);
+                pList->length--;
+            }
+            else
+            {
+                pNode->priorNode->nextNode = pNode->nextNode;
+                pNode->nextNode->priorNode = pNode->priorNode;
+                emva_free(pNode);
+                pList->length--;
+            }
+            return;
+        }
+        pNode = pNode->nextNode;
+    }
+}
+
+void Link_List_RemoveAt(Link_List *pList, unsigned long index)
+{
+    int i = 0;
+    Link_Node *pNode = NULL;
+    if (pList == NULL)
+    {
+        return;
+    }
+    i = 0;
+    pNode = pList->head;
+    while (pNode != NULL)
+    {
+        if (i == index)
+        {
+            if (pList->length == 0x01)
+            {
+                Link_List_Clear(pList);
+                return;
+            }
+
+            if (pNode->priorNode == NULL)
+            {
+                Link_Node *head = pList->head;
+                pList->head = head->nextNode;
+                pList->head->priorNode = NULL;
+                emva_free(head);
+                pList->length--;
+            }
+            else if (pNode->nextNode == NULL)
+            {
+                Link_Node *trial = pList->trail;
+                pList->trail = trial->priorNode;
+                pList->trail->nextNode = NULL;
+                emva_free(trial);
+                pList->length--;
+            }
+            else
+            {
+                pNode->priorNode->nextNode = pNode->nextNode;
+                pNode->nextNode->priorNode = pNode->priorNode;
+                emva_free(pNode);
+                pList->length--;
+            }
+            return;
+        }
+        pNode = pNode->nextNode;
+        i++;
+    }
+}
+
+void Link_List_Clear(Link_List *pList)
+{
+    Link_Node *pNode = NULL;
+    if (pList == NULL)
+    {
+        return;
+    }
+    pNode = pList->trail;
+    while (pNode != NULL)
+    {
+        pList->trail = pNode->priorNode;
+        emva_free(pNode);
+        pNode = pList->trail;
+    }
+    pList->length = 0;
+    pList->head = NULL;
+    pList->trail = NULL;
+}
+
+void Link_List_my_free(Link_List *pList)
+{
+    Link_Node *pNode = NULL;
+    if (pList == NULL)
+    {
+        return;
+    }
+    pNode = pList->trail;
+    while (pNode != NULL)
+    {
+        pList->trail = pNode->priorNode;
+        emva_free(pNode);
+        pNode = pList->trail;
+    }
+    pList->length = 0;
+    pList->head = NULL;
+    pList->trail = NULL;
+    emva_free(pList);
+    pList = NULL;
+}
+#endif
