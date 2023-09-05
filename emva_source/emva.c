@@ -1,8 +1,7 @@
-// Copyright (c) 2021-2022 The Eva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Copyright (c) 2021-2023 The Eva Core developers
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.virtualarch.org
 
-#include "hal.h"
 #include "emva.h"
 #include "dev_init.h"
 #include "emva_time.h"
@@ -14,15 +13,14 @@
 #include "emva_pmic.h"
 #include "emva_serialization.h"
 #include "emva_fmt.h"
-#include "emva_usb_hid.h"
 #include "dv_character_device.h"
 #include "dv_net_device.h"
-#include "iterator.h"
+#include "emva_iterator.h"
 #include "string.h"
 #include "emva_config.h"
 
 struct emva_api emva;
-void EmvaApiInit(void)
+void emvaApiInit(void)
 {
 #if EMVA_FM_SERIAL_ENABLED == 1
   emva.SerialClass = EmvaSerialClass;
@@ -40,21 +38,27 @@ void EmvaApiInit(void)
   emva.TimeClass = EmvaTimeClass;
 #endif
   emva.IteratorClass = EmvaEmvaIteratorApiClass;
+#if EMVA_FM_OBSERVER_ENABLED == 1
   emva.ObserverClass = EmvaObserver;
+#endif
   emva.SerializationClass = EmvaSerializationClass;
 #if EMVA_FM_SERIAL_ENABLED == 1
   emva.FmtClass = EmvafmtClass;
 #endif
-#if EMVA_FM_IR_ENABLED == 1
-  emva.IrTransmitClass = EmvaIrTransmitClass;
-#endif
-#if EMVA_FM_USBHID_ENABLED == 1
-  emva.UsbHid = EmvaUsbHid;
-#endif
 #if EMVA_FM_NET_ENABLED == 1
   emva.Net = EmvaNet;
 #endif
-  AggregateInterface *CharDriverNameAg = emva.IteratorClass.new();
+#if EMVA_FM_NET_ENABLED == 1
+  emva.Driver.LoadNetDriver = EmvaNetInitialize;
+#endif
+#if EMVA_FM_WIFI_ENABLED == 1
+  emva.Driver.LoadWifiDriver = EmvaWifiInitialize;
+#endif
+}
+
+void emvaDriverIteratorInit(void)
+{
+	AggregateInterface *CharDriverNameAg = emva.IteratorClass.new();
   AggregateInterface *NetDriverNameAg = emva.IteratorClass.new();
   emva.Driver.IteratorCdName = CharDriverNameAg->iterator(CharDriverNameAg);
   emva.Driver.IteratorNdName = NetDriverNameAg->iterator(NetDriverNameAg);
@@ -87,72 +91,72 @@ void EmvaApiInit(void)
     if (driverName)
       NetDriverNameAg->ContainerAdd(NetDriverNameAg, (byte *)driverInfo, sizeof(struct EmvaDriverInfo));
   } while (driverName != NULL);
-#if EMVA_FM_NET_ENABLED == 1
-  emva.Driver.LoadNetDriver = EmvaNetInitialize;
-#endif
-#if EMVA_FM_WIFI_ENABLED == 1
-  emva.Driver.LoadWifiDriver = EmvaWifiInitialize;
-#endif
 }
 
-#ifdef EMVA_CREATE_LIB
-void kernel_driver_init(void)
+void emvaDeviceInit(void (*call)(uint16 code, const char *info))
 {
-  extern void dv_time_init(void);
-  extern void dv_serial_init(void);
-  extern void dvTimeVirtualInit(void);
-  extern void dv_button_init(void);
-  extern void dv_pmic_init(void);
-  extern void dv_usb_hid_init(void);
-  extern void dv_ir_init(void);
-  dv_time_init();
-  dvTimeVirtualInit();
-  dv_serial_init();
-  dv_button_init();
-  dv_pmic_init();
-  dv_ir_init();
-  dv_usb_hid_init();
-}
+  EMVA_BOOL OK = FALSE;
+#if EMVA_FM_TIME_ENABLED == 1
+  // fm time init
+  OK = EmvaTimeInitialize();
+  if (call)
+  {
+    (OK == FALSE) ? call(0x2555, "emva time init [fail]") : call(0, "emva time init [ok]");
+  }
 #endif
+#if EMVA_FM_SERIAL_ENABLED == 1
+  // fm serial init
+  OK = EmvaSerialInitialize();
+  if (call)
+  {
+    (OK == FALSE) ? call(0x2556, "emva serial init [fail]") : call(0, "emva serial init [ok]");
+  }
+#endif
+#if EMVA_FM_WIFI_ENABLED == 1
+  // fm wifi support
+  OK = EmvaWifiInitialize(EMVA_WIFI_DRIVER_NAME);
+  if (call)
+  {
+    (OK == FALSE) ? call(0x2557, "emva wifi init [fail]") : call(0, "emva wifi init [ok]");
+  }
+#endif
+#if EMVA_FM_NET_ENABLED == 1
+  // fm net support
+  OK = EmvaNetInitialize(EMVA_NET_DRIVER_NAME);
+  if (call)
+  {
+    (OK == FALSE) ? call(0x2558, "emva net init [fail]") : call(0, "emva net init [ok]");
+  }
+#endif
+#if EMVA_FM_BUTTON_ENABLED == 1
+  // fm button support
+  OK = EmvaButtonInitialize();
+  if (call)
+  {
+    (OK == FALSE) ? call(0x2559, "emva button init [fail]") : call(0, "emva button init [ok]");
+  }
+#endif
+#if EMVA_PMIC_PMIC_ENABLED == 1
+  // fm pmic support
+  OK = EmvaPmicInitialize();
+  if (call)
+  {
+    (OK == FALSE) ? call(0x255a, "emva pmic init [fail]") : call(0, "emva pmic init [ok]");
+  }
+#endif
+}
 
 void emvaIniaialize(void)
 {
   // arch init
-  hal.arch->Initialize();
-#ifdef EMVA_CREATE_LIB
-  // kernel driver module init
-  kernel_driver_init();
-#endif
-  // driver module init
-  DvModuleInitialize();
-#if EMVA_FM_TIME_ENABLED == 1
-  // fm time init
-  EmvaTimeInitialize();
-#endif
-#if EMVA_FM_SERIAL_ENABLED == 1
-  // fm serial init
-  EmvaSerialInitialize();
-#endif
-#if EMVA_FM_WIFI_ENABLED == 1
-  // fm wifi support
-  EmvaWifiInitialize(EMVA_WIFI_DRIVER_NAME);
-#endif
-#if EMVA_FM_NET_ENABLED == 1
-  // fm net support
-  EmvaNetInitialize(EMVA_NET_DRIVER_NAME);
-#endif
-#if EMVA_FM_BUTTON_ENABLED == 1
-  // fm button support
-  EmvaButtonInitialize();
-#endif
-#if EMVA_PMIC_PMIC_ENABLED == 1
-  // fm pmic support
-  EmvaPmicInitialize();
-#endif
-#if EMVA_FM_USBHID_ENABLED == 1
-  // fm usb hid support
-  EmvaUsbHidInitialize();
-#endif
+  emva_arch_init();
+	
+	// mem init
+	emva_mallocInit();
+
+  // driver module manage init
+  drmanage_init();
+
   // emva api init
-  EmvaApiInit();
+  emvaApiInit();
 }

@@ -1,8 +1,8 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
-#include "emva_framework.h"
+#include "emva.h"
 #include "emva_malloc.h"
 #include "emva_led.h"
 #include "string.h"

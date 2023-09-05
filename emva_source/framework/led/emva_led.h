@@ -1,10 +1,9 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
 #ifndef __EMVA_LED_H_
 #define __EMVA_LED_H_
-
 #include "emva_list.h"
 #ifdef __cplusplus
 extern "C"
@@ -28,11 +27,11 @@ extern "C"
         // CtlInterface for the control interface needs to implement the parameter return TRUE,FALSE,CtlCallback for the control callback function can be NULL, pulse interval is minimum 1ms
         // positive_time is positive and negative_time is mutual and can be interpreted as high and low level. negative_time can be 0, which means only positive_time but positive_time is executed
         // The value cannot be 0. num indicates the number of executions
-        void (*Pulse1Start)(void (*CtlInterface)(bool, void *), void *, u16 positive_time, u16 negative_time, u16 num);
-        void (*Pulse2Start)(void (*CtlInterface)(bool, void *), void *, u16 positive_time, u16 negative_time, u16 num);
-        void (*Pulse3Start)(void (*CtlInterface)(bool, void *), void *, u16 positive_time, u16 negative_time, u16 num);
-        void (*Pulse4Start)(void (*CtlInterface)(bool, void *), void *, u16 positive_time, u16 negative_time, u16 num);
-        void (*Pulse5Start)(void (*CtlInterface)(bool, void *), void *, u16 positive_time, u16 negative_time, u16 num);
+        void (*Pulse1Start)(void (*CtlInterface)(EMVA_BOOL, void*), void*, uint16 positive_time, uint16 negative_time, uint16 num);
+        void (*Pulse2Start)(void (*CtlInterface)(EMVA_BOOL, void*), void*, uint16 positive_time, uint16 negative_time, uint16 num);
+        void (*Pulse3Start)(void (*CtlInterface)(EMVA_BOOL, void*), void*, uint16 positive_time, uint16 negative_time, uint16 num);
+        void (*Pulse4Start)(void (*CtlInterface)(EMVA_BOOL, void*), void*, uint16 positive_time, uint16 negative_time, uint16 num);
+        void (*Pulse5Start)(void (*CtlInterface)(EMVA_BOOL, void*), void*, uint16 positive_time, uint16 negative_time, uint16 num);
         void (*Pulse1Stop)(void);
         void (*Pulse2Stop)(void);
         void (*Pulse3Stop)(void);

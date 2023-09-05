@@ -1,11 +1,13 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
-#include "dv_malloc.h"
+#include "emva.h"
+#include "emva_malloc.h"
 #include "string.h"
 #include "stdio.h"
 #include "util.h"
+//CRC table
 const uint8 CRC_Array_H[] = 
 {
 	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
@@ -35,7 +37,6 @@ const uint8 CRC_Array_H[] =
 	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
 	0x80, 0x41, 0x00, 0xC1, 0x81, 0x40 
 };
-//CRC
 const uint8 CRC_Array_L[] = 
 {
 	0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 
@@ -65,7 +66,7 @@ const uint8 CRC_Array_L[] =
 	0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 
 	0x43, 0x83, 0x41, 0x81, 0x80, 0x40
 };
-uint8 isEqual(const byte *Sdata, const byte *Ddata, int32 length)
+uint8 is_equal(const byte *Sdata, const byte *Ddata, int32 length)
 {
     for (int32 i = 0; i < length; i++)
     {
@@ -76,14 +77,14 @@ uint8 isEqual(const byte *Sdata, const byte *Ddata, int32 length)
     }
     return 1;
 }
-uint16 MessageCountCRC16(uint8 *CRC_Data,uint8 CrcLenth)
+uint16 count_crc16(uint8 *dt,uint8 dt_len)
 {
 	uint8  Crc_H = 0xFF;
 	uint8  Crc_L = 0xFF;
 	uint8  Index;
-	while (CrcLenth--)
+	while (dt_len--)
 	{  
-	  Index = Crc_H ^ *CRC_Data++;
+	  Index = Crc_H ^ *dt++;
 		Crc_H = Crc_L ^  CRC_Array_H[Index]; 
 		Crc_L = CRC_Array_L[Index]; 
 	}

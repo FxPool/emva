@@ -1,8 +1,8 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
-#include "emva_framework.h"
+#include "emva.h"
 #include "emva_serialization.h"
 #include "emva_malloc.h"
 #include "string.h"
@@ -102,7 +102,7 @@ void Protocol_Analysis(emvaSerialization *this, void *d)
         this->MsgProtocol.MsgClass = *(uint32 *)(Dt + this->MsgHeadWidth + this->MsgLengthWidth);
     }
     this->MsgProtocol.MsgClass ^= this->rcode;
-    memcpy(this->MsgProtocol.MsgPayLoad, (Dt + this->MsgHeadWidth + this->MsgLengthWidth + this->MsgClassWidth), this->payloadLength - (this->MsgHeadWidth + this->MsgLengthWidth + this->MsgClassWidth));
+    memcpy(this->MsgProtocol.MsgPayLoad, (Dt + this->MsgHeadWidth + this->MsgLengthWidth + this->MsgClassWidth), this->payloadLengthSet - (this->MsgHeadWidth + this->MsgLengthWidth + this->MsgClassWidth));
 }
 //get object
 emvaSerialization *ProtocolFormatNew(uint8 MsgHeadWidth, uint8 MsgLengthWidth, uint8 MsgClassWidth, uint16 PaylodaLen, const char *lock, const uint8 rcode)
@@ -128,6 +128,7 @@ emvaSerialization *ProtocolFormatNew(uint8 MsgHeadWidth, uint8 MsgLengthWidth, u
     SendProtocol->MsgClassWidth = MsgClassWidth;
     SendProtocol->payloadOffset = MsgHeadWidth + MsgLengthWidth + MsgClassWidth;
     SendProtocol->payloadLength = PaylodaLen;
+    SendProtocol->payloadLengthSet = PaylodaLen;
     memcpy(SendProtocol->lock, lock, MsgHeadWidth);
     SendProtocol->rcode = rcode;
     return SendProtocol;

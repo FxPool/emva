@@ -1,5 +1,5 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
 #ifndef __EMVA_OB_SERVER_H_
@@ -20,7 +20,7 @@ extern "C"
     struct _subject
     {
         char *Name;
-        Link_List *ObMapList;
+        EmvaLink_List *ObMapList;
         void (*Notify)(Subject *s, const char *messges);
         void (*Add)(Subject *s, ObServer *ob);
         void (*Del)(Subject *s, ObServer *ob);

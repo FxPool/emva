@@ -1,5 +1,5 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
 #ifndef __EMVA_CONFIG_H
@@ -31,17 +31,47 @@ extern "C"
 
 // <q> WIFI_ENABLED  - emva_fm_wifi - wifi framework initializes&support
 #ifndef EMVA_FM_WIFI_ENABLED
-#define EMVA_FM_WIFI_ENABLED 0
+#define EMVA_FM_WIFI_ENABLED 1
 #endif
 
 // <e> NET_ENABLED  - emva_fm_net - net framework initializes&support
 #ifndef EMVA_FM_NET_ENABLED
-#define EMVA_FM_NET_ENABLED 0
+#define EMVA_FM_NET_ENABLED 1
 #endif
 // <o> NET_FIFO_BUFFER_SIZE - FIFO of the underlying network packets. 
 // <i> The cache size of the FIFO of the underlying network packets.
 #ifndef NET_FIFO_BUFFER_SIZE
 #define NET_FIFO_BUFFER_SIZE 512
+#endif
+// </e>
+
+// <e> RF_PAIR_ENABLED  - emva_fm_rf_pair - rf pair framework initializes&support
+#ifndef EMVA_FM_RF_PAIR_ENABLED
+#define EMVA_FM_RF_PAIR_ENABLED 0
+#endif
+// <o> PAIR_TIME_OUT - 
+#ifndef PAIR_TIME_OUT
+#define PAIR_TIME_OUT 25000
+#endif
+
+// <o> ID_LENGTH - 
+#ifndef ID_LENGTH
+#define ID_LENGTH 12
+#endif
+
+// <o> CODING_LENGTH - 
+#ifndef CODING_LENGTH
+#define CODING_LENGTH 2
+#endif
+
+// <o> RX_BUF_LEN - 
+#ifndef RX_BUF_LEN
+#define RX_BUF_LEN 32
+#endif
+
+// <o> SUC_PCKED_NUM - 
+#ifndef SUC_PCKED_NUM
+#define SUC_PCKED_NUM 5
 #endif
 // </e>
 
@@ -98,17 +128,6 @@ extern "C"
 #define CJSON_ENABLED 0
 #endif
 
-#define EMVA_DRIVER_VERSION "1.0.0"
-#define EMVA_DRIVER_OWNER "emva"
-#define EMVA_DRIVER_DATE "2021.10.12"
-#define EMVA_WIFI_DRIVER_NAME "EMVA_WIFI"
-#define EMVA_NET_DRIVER_NAME "EMVA_NET"
-#define EMVA_SERIAL_DRIVER_NAME "EMVA_SERIAL"
-#define EMVA_TIME_DRIVER_NAME "EMVA_TIME"
-#define EMVA_BUTTON_DRIVER_NAME "EMVA_BUTTON"
-#define EMVA_USB_HID_DRIVER_NAME "EMVA_USBHID"
-#define EMVA_POWER_DRIVER_NAME "EMVA_PMIC"
-#define EMVA_IR_DRIVER_NAME "EMVA_IR"
 #ifdef __cplusplus
 }
 #endif

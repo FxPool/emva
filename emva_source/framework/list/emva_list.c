@@ -1,18 +1,19 @@
 // Copyright (c) 2021-2022 The Emva Core developers
-// Distributed under the xxx_xx_xxx software license, see the accompanying
+// Distributed under the MIT license, see the accompanying
 // file COPYING or http://www.evirtualarch.org
 
-#include "emva_framework.h"
+#include "emva.h"
 #include "emva_list.h"
 #include "emva_malloc.h"
 #include <stdlib.h>
 #include "stdio.h"
 #include "string.h"
+#include "util.h"
 #if EMVA_FM_LIST_ENABLED == 1
-Link_List *Link_List_Init(void)
+EmvaLink_List *EmvaLink_List_Init(void)
 {
-    Link_List *pList = NULL;
-    pList = (Link_List *)emva_malloc(sizeof(Link_List));
+    EmvaLink_List *pList = NULL;
+    pList = (EmvaLink_List *)emva_malloc(sizeof(EmvaLink_List));
     if (pList == NULL)
     {
         return NULL;
@@ -23,7 +24,7 @@ Link_List *Link_List_Init(void)
     return pList;
 }
 
-int Link_List_Insert(Link_List *pList, void *pData, long index)
+int EmvaLink_List_Insert(EmvaLink_List *pList, void *pData, long index)
 {
     long i = 0;
     if (pList == NULL)
@@ -34,7 +35,7 @@ int Link_List_Insert(Link_List *pList, void *pData, long index)
     }
     if (pList->length == 0)
     {
-        Link_Node *pNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+        EmvaLink_Node *pNode = (EmvaLink_Node *)emva_malloc(sizeof(EmvaLink_Node));
         if (pNode == NULL)
             return -1;
         pNode->data = pData;
@@ -49,7 +50,7 @@ int Link_List_Insert(Link_List *pList, void *pData, long index)
     {
         if (-1 == index)
         {
-            Link_Node *pNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+            EmvaLink_Node *pNode = (EmvaLink_Node *)emva_malloc(sizeof(EmvaLink_Node));
             if (pNode == NULL)
                 return -1;
             pNode->data = pData;
@@ -62,7 +63,7 @@ int Link_List_Insert(Link_List *pList, void *pData, long index)
         }
         else if (0 == index)
         {
-            Link_Node *pNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+            EmvaLink_Node *pNode = (EmvaLink_Node *)emva_malloc(sizeof(EmvaLink_Node));
             if (pNode == NULL)
                 return -1;
             pNode->data = pData;
@@ -77,14 +78,14 @@ int Link_List_Insert(Link_List *pList, void *pData, long index)
         else
         {
 
-            Link_Node *pNode = pList->head;
+            EmvaLink_Node *pNode = pList->head;
             i = 0;
             while (pNode != NULL)
             {
                 if (index == i)
                 {
 
-                    Link_Node *pCurrentNode = (Link_Node *)emva_malloc(sizeof(Link_Node));
+                    EmvaLink_Node *pCurrentNode = (EmvaLink_Node *)emva_malloc(sizeof(EmvaLink_Node));
                     if (pCurrentNode == NULL)
                         return -1;
                     pCurrentNode->nextNode = pNode;
@@ -103,10 +104,10 @@ int Link_List_Insert(Link_List *pList, void *pData, long index)
     return 0;
 }
 
-void *Link_List_GetAt(Link_List *pList, unsigned long index)
+void *EmvaLink_List_GetAt(EmvaLink_List *pList, unsigned long index)
 {
     int i = 0;
-    Link_Node *pNode = NULL;
+    EmvaLink_Node *pNode = NULL;
     if (pList == NULL)
     {
         return NULL;
@@ -125,9 +126,9 @@ void *Link_List_GetAt(Link_List *pList, unsigned long index)
     return NULL;
 }
 
-int Link_List_object_SearchAt(Link_List *pList, object_t *object)
+int EmvaLink_List_object_SearchAt(EmvaLink_List *pList, object_t *object)
 {
-    Link_Node *pNode = NULL;
+    EmvaLink_Node *pNode = NULL;
     if (pList == NULL)
     {
         return -1;
@@ -136,7 +137,7 @@ int Link_List_object_SearchAt(Link_List *pList, object_t *object)
     pNode = pList->head;
     while (pNode != NULL)
     {
-        if (isEqual((unsigned char *)pNode->data, (unsigned char *)object->data, object->length))
+        if (is_equal((unsigned char *)pNode->data, (unsigned char *)object->data, object->length))
         {
             return i;
         }
@@ -146,9 +147,9 @@ int Link_List_object_SearchAt(Link_List *pList, object_t *object)
     return -1;
 }
 
-void Link_List_object_RemoveAt(Link_List *pList, object_t *object)
+void EmvaLink_List_object_RemoveAt(EmvaLink_List *pList, object_t *object)
 {
-    Link_Node *pNode = NULL;
+    EmvaLink_Node *pNode = NULL;
     if (pList == NULL)
     {
         return;
@@ -156,11 +157,11 @@ void Link_List_object_RemoveAt(Link_List *pList, object_t *object)
     pNode = pList->head;
     while (pNode != NULL)
     {
-        if (isEqual((unsigned char *)pNode->data, (unsigned char *)object->data, object->length))
+        if (is_equal((unsigned char *)pNode->data, (unsigned char *)object->data, object->length))
         {
             if (pNode->priorNode == NULL)
             {
-                Link_Node *head = pList->head;
+                EmvaLink_Node *head = pList->head;
                 pList->head = head->nextNode;
                 pList->head->priorNode = NULL;
                 emva_free(head);
@@ -168,7 +169,7 @@ void Link_List_object_RemoveAt(Link_List *pList, object_t *object)
             }
             else if (pNode->nextNode == NULL)
             {
-                Link_Node *trial = pList->trail;
+                EmvaLink_Node *trial = pList->trail;
                 pList->trail = trial->priorNode;
                 pList->trail->nextNode = NULL;
                 emva_free(trial);
@@ -187,10 +188,10 @@ void Link_List_object_RemoveAt(Link_List *pList, object_t *object)
     }
 }
 
-void Link_List_RemoveAt(Link_List *pList, unsigned long index)
+void EmvaLink_List_RemoveAt(EmvaLink_List *pList, unsigned long index)
 {
     int i = 0;
-    Link_Node *pNode = NULL;
+    EmvaLink_Node *pNode = NULL;
     if (pList == NULL)
     {
         return;
@@ -203,13 +204,13 @@ void Link_List_RemoveAt(Link_List *pList, unsigned long index)
         {
             if (pList->length == 0x01)
             {
-                Link_List_Clear(pList);
+                EmvaLink_List_Clear(pList);
                 return;
             }
 
             if (pNode->priorNode == NULL)
             {
-                Link_Node *head = pList->head;
+                EmvaLink_Node *head = pList->head;
                 pList->head = head->nextNode;
                 pList->head->priorNode = NULL;
                 emva_free(head);
@@ -217,7 +218,7 @@ void Link_List_RemoveAt(Link_List *pList, unsigned long index)
             }
             else if (pNode->nextNode == NULL)
             {
-                Link_Node *trial = pList->trail;
+                EmvaLink_Node *trial = pList->trail;
                 pList->trail = trial->priorNode;
                 pList->trail->nextNode = NULL;
                 emva_free(trial);
@@ -237,9 +238,9 @@ void Link_List_RemoveAt(Link_List *pList, unsigned long index)
     }
 }
 
-void Link_List_Clear(Link_List *pList)
+void EmvaLink_List_Clear(EmvaLink_List *pList)
 {
-    Link_Node *pNode = NULL;
+    EmvaLink_Node *pNode = NULL;
     if (pList == NULL)
     {
         return;
@@ -256,9 +257,9 @@ void Link_List_Clear(Link_List *pList)
     pList->trail = NULL;
 }
 
-void Link_List_my_free(Link_List *pList)
+void EmvaLink_List_my_free(EmvaLink_List *pList)
 {
-    Link_Node *pNode = NULL;
+    EmvaLink_Node *pNode = NULL;
     if (pList == NULL)
     {
         return;
